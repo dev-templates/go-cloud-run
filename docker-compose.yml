@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    container_name: test-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: example
+
+  app:
+    image: gcr.io/app/server
+    build: .
+    restart: always
+    container_name: server
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      DB_HOST: db_host
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: example
+      DB_DATABASE: postgres
+      GIN_MODE: release
+    links:
+      - "db:db_host"

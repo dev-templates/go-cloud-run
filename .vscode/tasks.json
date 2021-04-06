@@ -1,0 +1,99 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command":"go",
+            "options": {
+                "cwd": "${workspaceFolder}/bin",
+            },
+            "args": [
+                "build",
+                "${workspaceFolder}/cmd/go-cloud-run",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true,
+            }
+        },
+        {
+            "label": "docker-compose up",
+            "type": "docker-compose",
+            "dockerCompose": {
+                "up": {
+                    "detached": true,
+                    "build": true,
+                },
+                "files": [
+                    "${workspaceFolder}/docker-compose.yml",
+                ]
+            }
+        },
+        {
+            "label": "docker-compose down",
+            "type": "docker-compose",
+            "dockerCompose": {
+                "down": {
+                },
+                "files": [
+                    "${workspaceFolder}/docker-compose.yml",
+                ]
+            }
+        },
+        {
+            "label": "docker-compose up: db",
+            "type": "docker-compose",
+            "dockerCompose": {
+                "up": {
+                    "detached": true,
+                    "build": true,
+                    "services": ["db"]
+                },
+                "files": [
+                    "${workspaceFolder}/docker-compose.yml",
+                ]
+            }
+        },
+        {
+            "label": "docker-compose down: db",
+            "type": "docker-compose",
+            "dockerCompose": {
+                "down": {
+                    "services": ["db"]
+                },
+                "files": [
+                    "${workspaceFolder}/docker-compose.yml",
+                ]
+            }
+        },
+        {
+            "label": "docker-compose up: app",
+            "type": "docker-compose",
+            "dockerCompose": {
+                "up": {
+                    "detached": true,
+                    "build": true,
+                    "services": ["app"]
+                },
+                "files": [
+                    "${workspaceFolder}/docker-compose.yml",
+                ]
+            }
+        },
+        {
+            "label": "docker-compose down: app",
+            "type": "docker-compose",
+            "dockerCompose": {
+                "down": {
+                    "services": ["app"]
+                },
+                "files": [
+                    "${workspaceFolder}/docker-compose.yml",
+                ]
+            }
+        },
+    ]
+}
