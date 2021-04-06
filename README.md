@@ -30,7 +30,7 @@ It includes:
 
 ## Build
 
-- Visual Studio Code: `Terminal` → `Run Build Task... (CTRL+ALT+B)` to execute a fast build or run docker-compose.
+- Visual Studio Code: `Terminal` → `Run Build Task... (Ctrl+Shift+P => Tasks: Run Task)` to execute a fast build or run docker-compose.
 
 ## Maintainance
 
