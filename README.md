@@ -26,7 +26,7 @@ It includes:
 3. Replace all occurences of `dev-templates/go-cloud-run` to `your_org/repo_name` in all files.
 4. Rename folder `cmd/go-cloud-run` to `cmd/app_name`.
 5. Replace `gcr.io/app/server` to `gcr.io/<PROJECT_ID>/<IMAGE_ID>/repo_name` in `docker-compose.yml`.
-5. Update [LICENSE](LICENSE) and [README.md](README.md).
+6. Update [LICENSE](LICENSE) and [README.md](README.md).
 
 ## Build
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dev-templates/go-cloud-run/api/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/time/rate"
@@ -24,8 +25,11 @@ func Throttle(every time.Duration, maxBurstSize int) gin.HandlerFunc {
 }
 
 func InitRouter(r *gin.Engine, conn *sqlx.DB) {
+	echo := handler.NewEcho(conn)
 	api := r.Group("api", Throttle(time.Second, 60))
 	{
-		api.BasePath()
+		api.GET("echo", echo.Echo)
 	}
+
+	r.GET("/", echo.Echo)
 }
