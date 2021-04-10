@@ -1,7 +1,28 @@
-.idea/
-.vscode/
-bin/
-*.sh
-.gitignore
+# Github README.md
+README.md
+
+# git
+.git
 .gitattributes
+.gitignore
+
+# JetBrains
+.idea
+
+# Node
+**/node_modules
+
+# VSCode
+.vscode/
+
+# Output
+bin/
+
+# Custom Shell Scripts
+*.sh
+
+# Google Cloud Build
+cloudbuild.yml
+
+# Builds
 build/
