@@ -10,7 +10,9 @@ services:
 
   app:
     image: gcr.io/app/server
-    build: .
+    build:
+      context: ../
+      dockerfile: build/package/Dockerfile
     restart: always
     container_name: server
     ports:
