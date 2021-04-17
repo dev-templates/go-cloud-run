@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -18,8 +17,6 @@ func Throttle(every time.Duration, maxBurstSize int) gin.HandlerFunc {
 			c.Next()
 			return
 		}
-
-		_ = c.Error(fmt.Errorf("TooManyRequests"))
 		c.AbortWithStatus(http.StatusTooManyRequests)
 	}
 }
