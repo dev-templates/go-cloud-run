@@ -5,8 +5,6 @@ steps:
       - '--no-cache'
       - '-t'
       - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
-      - '--env'
-      - 'GIN_MODE=release'
       - .
       - '-f'
       - build/package/Dockerfile
@@ -28,6 +26,8 @@ steps:
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID,$_LABELS
       - '--region=$_DEPLOY_REGION'
       - '--quiet'
+      - '--set-env-vars'
+      - 'GIN_MODE=release'
     id: Deploy
     entrypoint: gcloud
 images:
@@ -35,4 +35,4 @@ images:
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
-  - go-cloud-run
+  - $_SERVICE_NAME
