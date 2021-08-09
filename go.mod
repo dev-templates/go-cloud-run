@@ -3,7 +3,7 @@ module github.com/dev-templates/go-cloud-run
 go 1.16
 
 require (
-	github.com/gin-gonic/gin v1.7.1
+	github.com/gin-gonic/gin v1.7.3
 	github.com/jmoiron/sqlx v1.3.3
 	github.com/lib/pq v1.10.0
 	go.uber.org/zap v1.16.0
