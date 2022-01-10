@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.20.0
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 )
 
