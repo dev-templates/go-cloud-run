@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -17,20 +18,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"go.uber.org/zap"
 )
 
 var (
-	logger, _ = zap.NewProduction(zap.Fields(zap.String("type", "main")))
+	logger    = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	shutdowns []func() error
 )
 
 func main() {
+	slog.SetDefault(logger)
 	ctx := context.Background()
 	port := os.Getenv("PORT")
 	conn := initConn()
 	app := gin.New()
-	app.Use(logWithZap(logger), recoveryWithZap(logger, true))
+	app.Use(logWithZap(), recoveryWithZap(true))
 	api.InitRouter(app, conn)
 	server := &http.Server{
 		Addr:    ":" + port,
@@ -41,10 +42,10 @@ func main() {
 
 	go gracefulShutdown(ctx, server, shutdown)
 
-	logger.Info("server starting: http://localhost" + server.Addr)
+	slog.Info("server starting: http://localhost" + server.Addr)
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		logger.Fatal("server error", zap.Error(err))
+		slog.Error("server error", slog.Any("err", err))
 	}
 	<-shutdown
 }
@@ -60,7 +61,8 @@ func initConn() *sqlx.DB {
 
 	conn, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
-		logger.Fatal(err.Error(), zap.Error(err))
+		slog.Error(err.Error(), slog.Any("err", err))
+		os.Exit(1)
 	}
 	// add to graceful shutdown list.
 	shutdowns = append(shutdowns, conn.Close)
@@ -74,11 +76,12 @@ func gracefulShutdown(ctx context.Context, server *http.Server, shutdown chan st
 	signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
 	<-sigint
 
-	logger.Info("shutting down server gracefully")
+	slog.Info("shutting down server gracefully")
 
 	// stop receiving any request.
 	if err := server.Shutdown(ctx); err != nil {
-		logger.Fatal("shutdown error", zap.Error(err))
+		slog.Error("shutdown error", slog.Any("err", err))
+		os.Exit(1)
 	}
 
 	// close any other modules.
@@ -89,7 +92,7 @@ func gracefulShutdown(ctx context.Context, server *http.Server, shutdown chan st
 	close(shutdown)
 }
 
-func logWithZap(logger *zap.Logger) gin.HandlerFunc {
+func logWithZap() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -100,23 +103,23 @@ func logWithZap(logger *zap.Logger) gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			// Append error field if this is an erroneous request.
 			for _, e := range c.Errors.Errors() {
-				logger.Error(e)
+				slog.Error(e)
 			}
 			return
 		}
 
-		logger.Info(c.Request.Method,
-			zap.Int("status", c.Writer.Status()),
-			zap.String("path", path),
-			zap.String("query", query),
-			zap.String("ip", c.ClientIP()),
-			zap.String("user-agent", c.Request.UserAgent()),
-			zap.String("latency", latency.String()),
+		slog.Info(c.Request.Method,
+			slog.Int("status", c.Writer.Status()),
+			slog.String("path", path),
+			slog.String("query", query),
+			slog.String("ip", c.ClientIP()),
+			slog.String("user-agent", c.Request.UserAgent()),
+			slog.String("latency", latency.String()),
 		)
 	}
 }
 
-func recoveryWithZap(logger *zap.Logger, stack bool) gin.HandlerFunc {
+func recoveryWithZap(stack bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -133,9 +136,9 @@ func recoveryWithZap(logger *zap.Logger, stack bool) gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					logger.Error(c.Request.URL.Path,
-						zap.Any("error", err),
-						zap.String("request", string(httpRequest)),
+					slog.Error(c.Request.URL.Path,
+						slog.Any("error", err),
+						slog.String("request", string(httpRequest)),
 					)
 					// If the connection is dead, we can't write a status to it.
 					c.Error(err.(error)) // nolint: errcheck
@@ -144,15 +147,15 @@ func recoveryWithZap(logger *zap.Logger, stack bool) gin.HandlerFunc {
 				}
 
 				if stack {
-					logger.Error("[Recovery from panic]",
-						zap.Any("error", err),
-						zap.String("request", string(httpRequest)),
-						zap.String("stack", string(debug.Stack())),
+					slog.Error("[Recovery from panic]",
+						slog.Any("error", err),
+						slog.String("request", string(httpRequest)),
+						slog.String("stack", string(debug.Stack())),
 					)
 				} else {
-					logger.Error("[Recovery from panic]",
-						zap.Any("error", err),
-						zap.String("request", string(httpRequest)),
+					slog.Error("[Recovery from panic]",
+						slog.Any("error", err),
+						slog.String("request", string(httpRequest)),
 					)
 				}
 				c.AbortWithStatus(http.StatusInternalServerError)
